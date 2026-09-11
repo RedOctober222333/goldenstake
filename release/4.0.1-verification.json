@@ -1,0 +1,41 @@
+{
+  "applicationId": "com.goldenstake.casino",
+  "developer": "LSD Stone Ltd",
+  "supportEmail": "onlyjessehere@gmail.com",
+  "versionName": "4.0.1",
+  "versionCode": 40001,
+  "minSdk": 26,
+  "targetSdk": 36,
+  "debuggable": false,
+  "permissions": [],
+  "nativeLibraries": [],
+  "aab": {
+    "file": "Golden-Stake-Casino-4.0.1-release.aab",
+    "bytes": 7787571,
+    "sha256": "2ce6715c2d3e0e2e4db4ba7be09adde3d517da0da8be0c9271159005668538b5"
+  },
+  "universalTestApk": {
+    "file": "Golden-Stake-Casino-4.0.1-release-test.apk",
+    "bytes": 8321376,
+    "sha256": "375edf7d802b071d39141cbef4304d0e2bee25a2a696793150b8c947af024a1f"
+  },
+  "uploadCertificateSha256": "81fb0cea8368ea2951ca4c67f5456871a6c93cbc6b3426bde298047a17e75750",
+  "checks": {
+    "officialAndroidReleaseCompilation": "PASS",
+    "bundletoolValidate": "PASS",
+    "aabSignature": "PASS",
+    "apkV2V3Signature": "PASS",
+    "zipalign": "PASS",
+    "androidLintErrors": 0,
+    "androidLintWarnings": 5,
+    "jvmScenarios": 76,
+    "originalOutcomeVectorsIdentical": 1000,
+    "ui4AssetsByteIdentical": 83,
+    "physicalDeviceOrEmulatorExecution": "NOT_PERFORMED",
+    "googlePlaySubmission": "NOT_PERFORMED"
+  },
+  "buildLocation": "Full application compiled and signed locally using the official toolchain obtained through this repository's successful GitHub Actions runs.",
+  "sourceDelivery": "Complete source ZIP, AAB and APK delivered separately to the repository owner. This repository is build-infrastructure/bootstrap only until the full source including binary assets is imported.",
+  "privacyStatus": "Provided URL returned HTTP 200; existing policy template contains a misspelled app name and data/AI processing claims absent from this version. Correct before moderation. Replacement drafts are in the delivered source ZIP.",
+  "privateSigningMaterial": "Generated locally, stored separately, not committed, not uploaded to Actions artifacts or GitHub Secrets."
+}
