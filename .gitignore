@@ -1,0 +1,26 @@
+# Android / Gradle
+.gradle/
+**/build/
+local.properties
+.idea/
+*.iml
+# Never commit upload keys, passwords, or signing backups
+*.jks
+*.keystore
+*.p12
+*.pfx
+key.properties
+keystore.properties
+signing.properties
+.env
+.env.*
+private-signing/
+signing-backup/
+# Build outputs and local tools
+*.apk
+*.aab
+*.apks
+*.hprof
+.toolchain/
+dist/
+.DS_Store
