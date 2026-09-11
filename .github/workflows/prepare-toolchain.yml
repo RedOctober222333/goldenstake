@@ -14,10 +14,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
+      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
@@ -26,8 +27,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
-          mkdir -p "$RUNNER_TEMP/warm/app/src/main/java/com/goldenstake/warm" "$RUNNER_TEMP/export" 
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+          mkdir -p "$RUNNER_TEMP/warm/app/src/main/java/com/goldenstake/warm" "$RUNNER_TEMP/export"
           cd "$RUNNER_TEMP/warm"
           cat > settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
