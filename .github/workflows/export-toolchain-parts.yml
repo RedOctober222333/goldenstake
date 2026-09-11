@@ -1,0 +1,46 @@
+name: Export temporary toolchain parts
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/export-toolchain-parts.yml']
+permissions:
+  actions: read
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: goldenstake-official-toolchain
+          run-id: 34627437672
+          github-token: ${{ github.token }}
+          path: incoming
+      - name: Split archive without changing contents
+        run: |
+          set -euo pipefail
+          mkdir -p part1 part2 evidence
+          split -b 300M -d -a 1 --numeric-suffixes=1 incoming/goldenstake-official-toolchain.tar.gz toolchain.part
+          mv toolchain.part1 part1/
+          mv toolchain.part2 part2/
+          cp incoming/toolchain.sha256 part1/
+          tar -xzf incoming/goldenstake-official-toolchain.tar.gz -C evidence ./privacy-page.html ./privacy-headers.txt ./java-version.txt ./sdk-installed.txt ./SDK-SHA256SUMS.txt
+          cat evidence/privacy-headers.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldenstake-toolchain-part1
+          path: part1/
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldenstake-toolchain-part2
+          path: part2/
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldenstake-policy-fetch
+          path: evidence/
+          retention-days: 3
