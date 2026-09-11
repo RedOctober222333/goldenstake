@@ -1,0 +1,92 @@
+name: Build Golden Stake release
+on:
+  workflow_dispatch:
+    inputs:
+      signed:
+        description: 'Sign with the existing upload key from repository Secrets'
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require complete source and artwork
+        run: |
+          set -euo pipefail
+          test -f app/build.gradle || { echo 'Import the complete delivered source ZIP into this repository first. This bootstrap repository is not yet a complete app checkout.'; exit 1; }
+          test -f app/src/main/assets/art/card-solar.png
+          test -f app/src/main/assets/audio/music-solar.wav
+          test -f core/src/com/goldenstake/casino/ReleaseInfo.java
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+          cache-disabled: true
+      - name: Install official SDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Run deterministic game and UI tests
+        run: bash tools/test.sh
+      - name: Compile unsigned candidate
+        if: ${{ !inputs.signed }}
+        run: |
+          set -euo pipefail
+          gradle :app:bundleRelease :app:lintRelease --no-daemon
+          mkdir -p dist
+          cp app/build/outputs/bundle/release/app-release.aab dist/Golden-Stake-Casino-UNSIGNED-candidate.aab
+          echo 'Unsigned compile-check artifact. Not a Play upload bundle.' > dist/READ-ME.txt
+      - name: Compile and sign release with owner upload key
+        if: ${{ inputs.signed }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.GOLDENSTAKE_KEYSTORE_BASE64 }}
+          GOLDENSTAKE_STORE_PASSWORD: ${{ secrets.GOLDENSTAKE_STORE_PASSWORD }}
+          GOLDENSTAKE_KEY_PASSWORD: ${{ secrets.GOLDENSTAKE_KEY_PASSWORD }}
+          GOLDENSTAKE_KEY_ALIAS: goldenstake-upload
+        run: |
+          set -euo pipefail
+          : "${KEYSTORE_BASE64:?Existing upload key missing from Secrets}"
+          : "${GOLDENSTAKE_STORE_PASSWORD:?Store password missing from Secrets}"
+          : "${GOLDENSTAKE_KEY_PASSWORD:?Key password missing from Secrets}"
+          export GOLDENSTAKE_KEYSTORE="$RUNNER_TEMP/goldenstake-upload.jks"
+          trap 'rm -f "$GOLDENSTAKE_KEYSTORE"' EXIT
+          python3 - <<'PY'
+          import os, base64
+          from pathlib import Path
+          path=Path(os.environ['GOLDENSTAKE_KEYSTORE'])
+          path.write_bytes(base64.b64decode(os.environ['KEYSTORE_BASE64'], validate=True))
+          path.chmod(0o600)
+          PY
+          export GRADLE_BIN="$(command -v gradle)"
+          bash tools/build-release.sh
+      - name: Validate bundle with official bundletool
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 'https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar' -o "$RUNNER_TEMP/bundletool.jar"
+          echo 'a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  '"$RUNNER_TEMP/bundletool.jar" | sha256sum -c -
+          for bundle in dist/*.aab; do java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle="$bundle"; done
+          sha256sum dist/*.aab > dist/BUNDLE-SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldenstake-${{ inputs.signed && 'signed-release' || 'UNSIGNED-candidate' }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: goldenstake-build-reports
+          path: |
+            app/build/reports/
+            build/reports/
+          if-no-files-found: ignore
+          retention-days: 14
