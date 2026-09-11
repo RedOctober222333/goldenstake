@@ -1,0 +1,6 @@
+2ce6715c2d3e0e2e4db4ba7be09adde3d517da0da8be0c9271159005668538b5  Golden-Stake-Casino-4.0.1-release.aab
+375edf7d802b071d39141cbef4304d0e2bee25a2a696793150b8c947af024a1f  Golden-Stake-Casino-4.0.1-release-test.apk
+02998560d25d9ae0cf224471cce0eb51cd7c7327fa493589556cc373cc04950d  Golden-Stake-Casino-4.0.1-source.zip
+f91ef40d44cd4dba6f4f671edd14eeb39f82ebd4e3282f682a3e3599dab2eb64  Golden-Stake-privacy-correction-RU-EN.zip
+15372af3036a9023273c39c38b0bf5bfe32169c164d9e0b33fe87abbbce88bd3  Golden-Stake-Casino-4.0.1-verification.zip
+0780cbbddd0e0877ad0b954201aa4d0fe9511ca8c284b62d07ae7864d9023d20  Golden-Stake-upload-certificate.pem
