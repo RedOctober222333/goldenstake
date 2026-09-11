@@ -1,0 +1,83 @@
+name: Prepare official Android release toolchain
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/prepare-toolchain.yml'
+permissions:
+  contents: read
+jobs:
+  toolchain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+          cache-disabled: true
+      - name: Prepare official SDK and dependency cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+          mkdir -p "$RUNNER_TEMP/warm/app/src/main/java/com/goldenstake/warm" "$RUNNER_TEMP/export" 
+          cd "$RUNNER_TEMP/warm"
+          cat > settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name='GoldenStakeToolchainWarmup'
+          include ':app'
+          EOF
+          echo "plugins { id 'com.android.application' version '8.13.2' apply false }" > build.gradle
+          cat > app/build.gradle <<'EOF'
+          plugins { id 'com.android.application' }
+          android {
+            namespace 'com.goldenstake.warm'
+            compileSdk 36
+            buildToolsVersion '36.0.0'
+            defaultConfig { applicationId 'com.goldenstake.warm'; minSdk 26; targetSdk 36; versionCode 1; versionName '1' }
+            compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+            lint { abortOnError false }
+            buildTypes { release { minifyEnabled false } }
+          }
+          EOF
+          echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="Toolchain warmup"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
+          echo 'package com.goldenstake.warm; public class MainActivity extends android.app.Activity { protected void onCreate(android.os.Bundle b) { super.onCreate(b); android.widget.TextView t = new android.widget.TextView(this); t.setText("Toolchain warmup only"); setContentView(t); } }' > app/src/main/java/com/goldenstake/warm/MainActivity.java
+          gradle :app:assembleRelease :app:bundleRelease :app:lintRelease wrapper --gradle-version 8.13 --no-daemon
+          gradle --stop
+          mkdir -p "$RUNNER_TEMP/export/sdk/platforms" "$RUNNER_TEMP/export/sdk/build-tools" "$RUNNER_TEMP/export/gradle-home/caches"
+          cp -a "$ANDROID_HOME/platforms/android-36" "$RUNNER_TEMP/export/sdk/platforms/"
+          cp -a "$ANDROID_HOME/build-tools/36.0.0" "$RUNNER_TEMP/export/sdk/build-tools/"
+          cp -a "$ANDROID_HOME/platform-tools" "$RUNNER_TEMP/export/sdk/"
+          cp -a "$ANDROID_HOME/licenses" "$RUNNER_TEMP/export/sdk/"
+          cp -a "$HOME/.gradle/caches/modules-2" "$RUNNER_TEMP/export/gradle-home/caches/"
+          cp -a "$HOME/.gradle/caches/8.13" "$RUNNER_TEMP/export/gradle-home/caches/"
+          cp -a "$(dirname "$(dirname "$(readlink -f "$(command -v gradle)")")")" "$RUNNER_TEMP/export/gradle-8.13"
+          cp -a gradlew gradlew.bat gradle "$RUNNER_TEMP/export/"
+          cp -a app/build/reports "$RUNNER_TEMP/export/warmup-reports"
+          find "$RUNNER_TEMP/export/gradle-home" -name '*.lock' -delete
+          curl --fail --location --retry 3 'https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar' -o "$RUNNER_TEMP/export/bundletool.jar"
+          echo 'a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  '"$RUNNER_TEMP/export/bundletool.jar" | sha256sum -c -
+          curl --location --max-time 45 --retry 2 --dump-header "$RUNNER_TEMP/export/privacy-headers.txt" 'https://doc-hosting.flycricket.io/golsden-stake-casino-privacy-policy/d2b429ad-44ee-4a0d-abba-54967f87bf05/privacy' -o "$RUNNER_TEMP/export/privacy-page.html" || true
+          java -version 2> "$RUNNER_TEMP/export/java-version.txt"
+          sdkmanager --list_installed > "$RUNNER_TEMP/export/sdk-installed.txt"
+          cd "$RUNNER_TEMP/export"
+          find sdk -type f -print0 | sort -z | xargs -0 sha256sum > SDK-SHA256SUMS.txt
+          tar -czf "$RUNNER_TEMP/goldenstake-official-toolchain.tar.gz" .
+          sha256sum "$RUNNER_TEMP/goldenstake-official-toolchain.tar.gz" > "$RUNNER_TEMP/toolchain.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldenstake-official-toolchain
+          path: |
+            ${{ runner.temp }}/goldenstake-official-toolchain.tar.gz
+            ${{ runner.temp }}/toolchain.sha256
+          compression-level: 0
+          retention-days: 3
+          if-no-files-found: error
