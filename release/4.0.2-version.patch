@@ -1,0 +1,40 @@
+diff -ruN source-4.0.1/ReleaseInfo.java source-4.0.2/ReleaseInfo.java
+--- source-4.0.1/ReleaseInfo.java
++++ source-4.0.2/ReleaseInfo.java
+@@ -4,8 +4,8 @@
+ public final class ReleaseInfo {
+     private ReleaseInfo() {}
+     public static final String APP_NAME = "Golden Stake Casino";
+-    public static final String VERSION_NAME = "4.0.1";
+-    public static final int VERSION_CODE = 40001;
++    public static final String VERSION_NAME = "4.0.2";
++    public static final int VERSION_CODE = 40002;
+     public static final String APPLICATION_ID = "com.goldenstake.casino";
+     public static final String DEVELOPER = "LSD Stone Ltd";
+     public static final String SUPPORT_EMAIL = "onlyjessehere@gmail.com";
+diff -ruN source-4.0.1/ReleaseTest.java source-4.0.2/ReleaseTest.java
+--- source-4.0.1/ReleaseTest.java
++++ source-4.0.2/ReleaseTest.java
+@@ -27,7 +27,7 @@
+     public static void main(String[] args) {
+         test("Release identity is separate from preview package", () -> {
+             check(ReleaseInfo.APPLICATION_ID.equals("com.goldenstake.casino"),"package");
+-            check(ReleaseInfo.VERSION_CODE==40001 && ReleaseInfo.VERSION_NAME.equals("4.0.1"),"version");
++            check(ReleaseInfo.VERSION_CODE==40002 && ReleaseInfo.VERSION_NAME.equals("4.0.2"),"version");
+             check(ReleaseInfo.DEVELOPER.equals("LSD Stone Ltd"),"developer");
+             check(ReleaseInfo.SUPPORT_EMAIL.equals("onlyjessehere@gmail.com"),"support");
+         });
+diff -ruN source-4.0.1/app-build.gradle source-4.0.2/app-build.gradle
+--- source-4.0.1/app-build.gradle
++++ source-4.0.2/app-build.gradle
+@@ -14,8 +14,8 @@
+         applicationId 'com.goldenstake.casino'
+         minSdk 26
+         targetSdk 36
+-        versionCode 40001
+-        versionName '4.0.1'
++        versionCode 40002
++        versionName '4.0.2'
+     }
+     sourceSets { main.java.srcDirs += '../core/src' }
+     compileOptions {
