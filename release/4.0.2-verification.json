@@ -1,0 +1,41 @@
+{
+  "applicationId": "com.goldenstake.casino",
+  "developer": "LSD Stone Ltd",
+  "supportEmail": "onlyjessehere@gmail.com",
+  "versionName": "4.0.2",
+  "versionCode": 40002,
+  "minSdk": 26,
+  "targetSdk": 36,
+  "debuggable": false,
+  "permissions": [],
+  "nativeLibraries": [],
+  "aab": {
+    "file": "Golden-Stake-Casino-4.0.2-release.aab",
+    "bytes": 7787574,
+    "sha256": "87f1a7a7e8883e1782e7e74a5419d9e818174d9cca7bda341277276de60910c3"
+  },
+  "universalTestApk": {
+    "file": "Golden-Stake-Casino-4.0.2-release-test.apk",
+    "bytes": 8318959,
+    "sha256": "5aeb048c3b813d24a0dba381b8cf25d1d35689747422a96a27f4459df30367f5"
+  },
+  "sourceArchive": {
+    "file": "Golden-Stake-Casino-4.0.2-source.zip",
+    "bytes": 13426749,
+    "sha256": "00803d8059552cf9ad0c1c60e13a6ffb332661b6c8b50965a9f85d30d57ca1b3"
+  },
+  "uploadCertificateSha256": "81fb0cea8368ea2951ca4c67f5456871a6c93cbc6b3426bde298047a17e75750",
+  "checks": {
+    "officialAndroidReleaseCompilation": "PASS",
+    "bundletoolValidate": "PASS",
+    "aabSignature": "PASS",
+    "androidLintErrors": 0,
+    "androidLintWarnings": 5,
+    "jvmScenarios": 76,
+    "originalOutcomeVectorsIdentical": 1000,
+    "physicalDeviceOrEmulatorExecution": "NOT_PERFORMED",
+    "googlePlaySubmission": "NOT_PERFORMED"
+  },
+  "changeFromPreviousRelease": "Version bump from 4.0.1/40001 to 4.0.2/40002; signed with the same upload key.",
+  "privateSigningMaterial": "Not committed to GitHub."
+}
